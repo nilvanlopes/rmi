@@ -3,25 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package server;
+package banco;
 
 /**
  *
  * @author pyulo
  */
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 class Conta{
-	private Double saldo;
-        private Integer numerodaconta;
+	private double saldo;
+        private final int numerodaconta;
         private String senha;
 
     public Conta(Double saldo, Integer numerodaconta, String senha) {
@@ -56,7 +49,7 @@ class Conta{
 
 public class BancoImp implements Banco{
 
-    private ArrayList<Conta> contas;
+    private final ArrayList<Conta> contas;
     private Conta ContaLogada;
 
     public BancoImp() throws RemoteException {
@@ -65,63 +58,66 @@ public class BancoImp implements Banco{
     }
     
     @Override
-    public void cria(String senha) throws RemoteException {
+    public String cria(String senha) throws RemoteException {
         Conta acc = new Conta(0.0, contas.size(), senha);
         contas.add(acc);
-        System.out.println("Conta Número : "+acc.getNumerodaconta()+"criada");
+        return ("Conta Número : "+acc.getNumerodaconta()+" criada\n");
     }
     
     @Override
-    public void logar(int numerodaconta, String senha) throws RemoteException {
-        
-        for (Conta conta: contas) {
-            if(conta.getNumerodaconta()==numerodaconta && conta.getSenha()==senha){
-            ContaLogada = conta;
-            return;
+    public String logar(int numerodaconta, String senha) throws RemoteException {
+        int n = contas.size();
+        int i;
+        for (i=0; i<n; i++) {
+            if(contas.get(i).getNumerodaconta()==numerodaconta && contas.get(i).getSenha().equals(senha)){
+            ContaLogada = contas.get(i);
+            return "Login Completo\n";
             }
         }  
-        System.out.println("Número da Conta ou senha incorretos");
+       return ("Número da Conta ou senha incorretos\n");
     }
 
     @Override
-    public void depositar(double valor,int numerodaconta) throws RemoteException {
+    public String depositar(double valor,int numerodaconta) throws RemoteException {
          for (Conta conta: contas) {
             if(conta.getNumerodaconta()==numerodaconta){
             conta.setSaldo(conta.getSaldo()+valor);
-            return;
+            return "Deposito Realizado\n";
             }
         }
-        System.out.println("Número da Conta ou senha incorretos");
+        return "Número da Conta ou senha incorretos\n";
     }
     
     @Override
-    public void depositar(double valor) throws RemoteException {
-        if(ContaLogada==null){System.out.println("Realize o Login");return;}
+    public String depositar(double valor) throws RemoteException {
+        if(ContaLogada==null){return "Realize o Login\n";}
         ContaLogada.setSaldo(ContaLogada.getSaldo()+valor);
+        return "Depósito Realizado\n";
     }
 
     @Override
     public String extrato() throws RemoteException {
-        if(ContaLogada==null){return"Realize o Login";}
+        if(ContaLogada==null){return"Realize o Login\n";}
         return ("Saldo : "+ContaLogada.getSaldo().toString());
     }
 
     @Override
-    public void transferir(int numerodaconta, double valor) throws RemoteException {
-        if(ContaLogada==null){System.out.println("Realize o Login");return;}
+    public String transferir(int numerodaconta, double valor) throws RemoteException {
+        if(ContaLogada==null){return "Realize o Login\n";}
         for (Conta conta: contas) {
             if(conta.getNumerodaconta()==numerodaconta){
             conta.setSaldo(conta.getSaldo()+valor);
             ContaLogada.setSaldo(ContaLogada.getSaldo()-valor);
-            return;
+            return "Transferencia Realizada\n";
             }
         }  
-        System.out.println("Número da Conta ou senha incorretos");
+        return "Número da Conta ou senha incorretos\n";
     }
 
     @Override
-    public void sair() throws RemoteException {
+    public String sair() throws RemoteException {
        ContaLogada = null;
+       return "BYE\n";
     }
     
     
