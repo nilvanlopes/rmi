@@ -12,7 +12,7 @@ package banco;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-public interface Banco extends Remote{
+    public interface Banco extends Remote{
 	
         String cria(String senha) throws RemoteException;
         
